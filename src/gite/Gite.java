@@ -15,6 +15,8 @@ public class Gite {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        GraficaGite g = new GraficaGite();
+        g.setVisible(true);
     }
     
 }
