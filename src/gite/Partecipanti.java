@@ -10,14 +10,14 @@ import java.util.*;
  * @author ranasgalla.niccolo
  */
 public class Partecipanti {
-    private ArrayList<Studente> iscrtitti;
+    private ArrayList<Studente> iscritti;
 
     public Partecipanti(ArrayList<Studente> iscrtitti) {
-        this.iscrtitti = iscrtitti;
+        this.iscritti = new ArrayList<>();
     }
 
-    public ArrayList<Studente> getIscrtitti() {
-        return iscrtitti;
+    public void AggiungiStudnete(Studente s){
+        iscritti.add(s);
     }
     
 }

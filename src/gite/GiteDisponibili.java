@@ -10,4 +10,11 @@ import java.util.*;
  */
 public class GiteDisponibili {
     private ArrayList<Gita> listaGita; 
+
+    public GiteDisponibili(ArrayList<Gita> listaGita) {
+        this.listaGita = new ArrayList<>();
+    }
+    public void AggiungiGita(Gita g){
+        listaGita.add(g);
+    }
 }
