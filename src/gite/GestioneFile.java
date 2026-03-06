@@ -22,7 +22,7 @@ public class GestioneFile {
         creaSeNonEsiste(FILE_GITA);
         creaSeNonEsiste(FILE_ISCRIZIONI);
     }
-    private static final int DIM_RECORD = 70; // nome 30 cognome 30 classe 10
+    private static final int DIM_RECORD = 100;
     private void creaSeNonEsiste(String nomeFile) {
         File f = new File(nomeFile);
         if (!f.exists()) {
