@@ -22,7 +22,7 @@ public class GestioneFile {
         creaSeNonEsiste(FILE_GITE);
         creaSeNonEsiste(FILE_ISCRIZIONI);
     }
-    private static final int DIM_RECORD = ;
+    private static final int DIM_RECORD = 70; // nome 30 cognome 30 classe 10
     private void creaSeNonEsiste(String nomeFile) {
         File f = new File(nomeFile);
         if (!f.exists()) {
@@ -46,24 +46,24 @@ public class GestioneFile {
         }
         return s;
     }
-    public void AggiungiRecord(){
+    public void AggiungiRecord(Studente s){
         try {
-            RandomAccessFile file = new RandomAccessFile("elenco.dat", "rw");
+            RandomAccessFile file = new RandomAccessFile("studenti.dat", "rw");
             //calcolo la dimensione del file per capire quanti record ci sono. 
             //Questo serve perché ogni nuovo record vine aggiunto in fondo
             int nRecord = (int) (file.length() / DIM_RECORD);
             //con il metodo seek ci si sposta all'interno del file alla posizione desiderata
             file.seek(nRecord * DIM_RECORD);
             //leggo il nome dalla text field e ne aggiusto la lunghezza perché deve essere per forza 20
-            String nome = aggiustaLunghezzaStringa(txtNome.getText().trim());
+            String nome = aggiustaLunghezzaStringa(s.getNome().trim());
             //leggo il cognome dalla text field e ne aggiusto la lunghezza perché deve essere per forza 20
-            String cognome = aggiustaLunghezzaStringa(txtCognome.getText());
-            int eta = Integer.parseInt(txtEta.getText());
+            String cognome = aggiustaLunghezzaStringa(s.getCognome().trim());
+            String classe = aggiustaLunghezzaStringa(s.getClasse().trim());
             //scrittura su file
             System.out.println(" " + nome);
             file.writeChars(nome);
             file.writeChars(cognome);
-            file.writeInt(eta);
+            file.writeChars(classe);
 
             file.close();
 
