@@ -4,6 +4,10 @@
  */
 package gite;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
 /**
  *
  * @author ranasgalla.niccolo
@@ -143,11 +147,69 @@ public class GraficaGite extends javax.swing.JFrame {
     }//GEN-LAST:event_txtNomeActionPerformed
 
     private void btnLeggiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLeggiActionPerformed
-        // TODO add your handling code here:
+        /*
+        try {
+            RandomAccessFile file = new RandomAccessFile("elenco.dat", "r");
+            //calcolo la dimensione del file per capire quanti record ci sono. 
+
+            int nRecord = (int) (file.length() / DIM_RECORD);
+            if (nRecord > 0) {
+                int recordAttuale = 0;
+                while (recordAttuale < nRecord) {
+                    file.seek(recordAttuale * DIM_RECORD);
+                    //leggo il nome ricordando che è di 20 caratteri
+                    String nomeLetto = "";
+                    for (int i = 0; i < 20; i++) {
+                        nomeLetto += file.readChar();
+                    }
+                    //leggo il nome ricordando che è di 20 caratteri
+                    String cognomeLetto = "";
+                    for (int i = 0; i < 20; i++) {
+                        cognomeLetto += file.readChar();
+                    }
+                    int etaLetta = file.readInt();
+                    atxStampa.append(nomeLetto + "\n" + cognomeLetto + "\n" + etaLetta + "\n ---- \n");
+                    recordAttuale++;
+                }
+            }
+            file.close();
+
+        } catch (FileNotFoundException ex) {
+            System.out.println("File non trovato");
+        } catch (IOException e) {
+            System.out.println("Problema in lettura-scrittura file");
+        }
+        */
     }//GEN-LAST:event_btnLeggiActionPerformed
 
     private void btnIscriviActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIscriviActionPerformed
-        // TODO add your handling code here:
+       /*
+        try {
+            RandomAccessFile file = new RandomAccessFile("elenco.dat", "rw");
+            //calcolo la dimensione del file per capire quanti record ci sono. 
+            //Questo serve perché ogni nuovo record vine aggiunto in fondo
+            int nRecord = (int) (file.length() / DIM_RECORD);
+            //con il metodo seek ci si sposta all'interno del file alla posizione desiderata
+            file.seek(nRecord * DIM_RECORD);
+            //leggo il nome dalla text field e ne aggiusto la lunghezza perché deve essere per forza 20
+            String nome = aggiustaLunghezzaStringa(txtNome.getText().trim());
+            //leggo il cognome dalla text field e ne aggiusto la lunghezza perché deve essere per forza 20
+            String cognome = aggiustaLunghezzaStringa(txtCognome.getText());
+            int eta = Integer.parseInt(txtEta.getText());
+            //scrittura su file
+            System.out.println(" " + nome);
+            file.writeChars(nome);
+            file.writeChars(cognome);
+            file.writeInt(eta);
+
+            file.close();
+
+        } catch (FileNotFoundException ex) {
+            System.out.println("File non trovato");
+        } catch (IOException e) {
+            System.out.println("Problema in lettura-scrittura file");
+        }
+        */
     }//GEN-LAST:event_btnIscriviActionPerformed
 
     /**
