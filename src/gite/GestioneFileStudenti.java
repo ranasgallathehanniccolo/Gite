@@ -4,22 +4,20 @@
  */
 package gite;
 import java.io.RandomAccessFile;
-import java.io.IOException;
 import java.io.*;
-import java.util.*;
 /**
  *
  * @author ranasgalla.niccolo
  */
 public class GestioneFileStudenti {
     private static final String FILE_STUDENTI = "studenti.dat";
+    // 3 campi da 20 char, ogni char = 2 byte → 3 * 20 * 2 = 120 byte
+    public static final int DIM_RECORD = 120;
 
-    
     public GestioneFileStudenti() {
         creaSeNonEsiste(FILE_STUDENTI);
-        
     }
-    private static final int DIM_RECORD = 100;
+    
     private void creaSeNonEsiste(String nomeFile) {
         File f = new File(nomeFile);
         if (!f.exists()) {
@@ -30,36 +28,51 @@ public class GestioneFileStudenti {
             }
         }
     }
-    private String aggiustaLunghezzaStringa(String s) {
-        String aggiustata = s;
-        if (s.length() < 20) {
-            for (int i = 0; i < (20 - s.length()); i++) {
-                aggiustata += "*";
-            }
-            return aggiustata;
-        } else if (s.length() > 20) {
-            aggiustata = s.substring(0, 19);
-            return aggiustata;
-        }
-        return s;
+    
+     private String aggiustaLunghezza(String s) {
+        if (s.length() > 20) return s.substring(0, 20);
+        StringBuilder sb = new StringBuilder(s);
+        while (sb.length() < 20) sb.append('*');
+        return sb.toString();
     }
-    public void AggiungiRecordStudente(Studente s){
-        try {
-            RandomAccessFile file = new RandomAccessFile("studenti.dat", "rw");
-            int nRecord = (int) (file.length() / DIM_RECORD);   
-            file.seek(nRecord * DIM_RECORD);
-            String nome = aggiustaLunghezzaStringa(s.getNome().trim());
-            String cognome = aggiustaLunghezzaStringa(s.getCognome().trim());
-            String classe = aggiustaLunghezzaStringa(s.getClasse().trim());
-            System.out.println(" " + nome);
-            file.writeChars(nome);
-            file.writeChars(cognome);
-            file.writeChars(classe);
-            file.close();
-        } catch (FileNotFoundException ex) {
-            System.out.println("File non trovato");
+     
+     public int aggiungiStudente(Studente s) {
+        int id = -1;
+        try (RandomAccessFile file = new RandomAccessFile(FILE_STUDENTI, "rw")) {
+            id = (int) (file.length() / DIM_RECORD);
+            file.seek(id * DIM_RECORD);
+            file.writeChars(aggiustaLunghezza(s.getNome().trim()));
+            file.writeChars(aggiustaLunghezza(s.getCognome().trim()));
+            file.writeChars(aggiustaLunghezza(s.getClasse().trim()));
         } catch (IOException e) {
-            System.out.println("Problema in lettura-scrittura file");
+            System.out.println("Errore scrittura studente: " + e.getMessage());
         }
+        return id;
+    }
+     
+      public Studente[] leggiTuttiStudenti() {
+        try (RandomAccessFile file = new RandomAccessFile(FILE_STUDENTI, "r")) {
+            int nRecord = (int) (file.length() / DIM_RECORD);
+            Studente[] studenti = new Studente[nRecord];
+            for (int i = 0; i < nRecord; i++) {
+                file.seek(i * DIM_RECORD);
+                String nome = leggiStringa(file, 20).replace("*", "").trim();
+                String cognome = leggiStringa(file, 20).replace("*", "").trim();
+                String classe = leggiStringa(file, 20).replace("*", "").trim();
+                studenti[i] = new Studente(nome, cognome, classe, i);
+            }
+            return studenti;
+        } catch (IOException e) {
+            System.out.println("Errore lettura studenti: " + e.getMessage());
+            return new Studente[0];
+        }
+    }
+      
+     private String leggiStringa(RandomAccessFile file, int nChar) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < nChar; i++) {
+            sb.append(file.readChar());
+        }
+        return sb.toString();
     }
 }

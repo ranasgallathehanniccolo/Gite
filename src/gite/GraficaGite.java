@@ -16,11 +16,24 @@ public class GraficaGite extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GraficaGite.class.getName());
 
+    private GestioneFileStudenti gestStudenti;
+    private GestioneFileGite     gestGite;
     /**
      * Creates new form GraficaGite
      */
     public GraficaGite() {
         initComponents();
+        gestStudenti = new GestioneFileStudenti();
+        gestGite     = new GestioneFileGite();
+        caricaGiteNelComboBox();
+    }
+    
+    private void caricaGiteNelComboBox() {
+        Gita[] gite = gestGite.leggiTutteGite();
+        cmbGiteDisponibili.removeAllItems();
+        for (Gita g : gite) {
+            cmbGiteDisponibili.addItem(g.getNome()); // mostra il nome, l'indice = id
+        }
     }
 
     /**
@@ -58,6 +71,7 @@ public class GraficaGite extends javax.swing.JFrame {
             }
         });
 
+        jTextArea1.setEditable(false);
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
@@ -147,69 +161,82 @@ public class GraficaGite extends javax.swing.JFrame {
     }//GEN-LAST:event_txtNomeActionPerformed
 
     private void btnLeggiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLeggiActionPerformed
-        /*
-        try {
-            RandomAccessFile file = new RandomAccessFile("elenco.dat", "r");
-            //calcolo la dimensione del file per capire quanti record ci sono. 
+        jTextArea1.setText(""); // pulizia area testo
 
-            int nRecord = (int) (file.length() / DIM_RECORD);
-            if (nRecord > 0) {
-                int recordAttuale = 0;
-                while (recordAttuale < nRecord) {
-                    file.seek(recordAttuale * DIM_RECORD);
-                    //leggo il nome ricordando che è di 20 caratteri
-                    String nomeLetto = "";
-                    for (int i = 0; i < 20; i++) {
-                        nomeLetto += file.readChar();
-                    }
-                    //leggo il nome ricordando che è di 20 caratteri
-                    String cognomeLetto = "";
-                    for (int i = 0; i < 20; i++) {
-                        cognomeLetto += file.readChar();
-                    }
-                    int etaLetta = file.readInt();
-                    atxStampa.append(nomeLetto + "\n" + cognomeLetto + "\n" + etaLetta + "\n ---- \n");
-                    recordAttuale++;
-                }
-            }
-            file.close();
+        Studente[] studenti   = gestStudenti.leggiTuttiStudenti();
+        Gita[]     gite       = gestGite.leggiTutteGite();
+        int[][]    iscrizioni = gestGite.leggiTutteIscrizioni();
 
-        } catch (FileNotFoundException ex) {
-            System.out.println("File non trovato");
-        } catch (IOException e) {
-            System.out.println("Problema in lettura-scrittura file");
+        if (iscrizioni.length == 0) {
+            jTextArea1.append("Nessuna iscrizione presente.\n");
+            return;
         }
-        */
+
+        jTextArea1.append("=== ISCRIZIONI ===\n");
+        for (int[] isc : iscrizioni) {
+            int idS = isc[0];
+            int idG = isc[1];
+
+            String nomeStudente    = (idS >= 0 && idS < studenti.length)
+                    ? studenti[idS].getNome() + " " + studenti[idS].getCognome()
+                    : "Studente #" + idS;
+            String nomeGita        = (idG >= 0 && idG < gite.length)
+                    ? gite[idG].getNome()
+                    : "Gita #" + idG;
+
+            jTextArea1.append("• " + nomeStudente + " [ID " + idS + "]"
+                    + " → " + nomeGita + " [ID " + idG + "]\n");
+        }
     }//GEN-LAST:event_btnLeggiActionPerformed
 
     private void btnIscriviActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIscriviActionPerformed
-       /*
-        try {
-            RandomAccessFile file = new RandomAccessFile("elenco.dat", "rw");
-            //calcolo la dimensione del file per capire quanti record ci sono. 
-            //Questo serve perché ogni nuovo record vine aggiunto in fondo
-            int nRecord = (int) (file.length() / DIM_RECORD);
-            //con il metodo seek ci si sposta all'interno del file alla posizione desiderata
-            file.seek(nRecord * DIM_RECORD);
-            //leggo il nome dalla text field e ne aggiusto la lunghezza perché deve essere per forza 20
-            String nome = aggiustaLunghezzaStringa(txtNome.getText().trim());
-            //leggo il cognome dalla text field e ne aggiusto la lunghezza perché deve essere per forza 20
-            String cognome = aggiustaLunghezzaStringa(txtCognome.getText());
-            int eta = Integer.parseInt(txtEta.getText());
-            //scrittura su file
-            System.out.println(" " + nome);
-            file.writeChars(nome);
-            file.writeChars(cognome);
-            file.writeInt(eta);
+       String nome    = txtNome.getText().trim();
+        String cognome = txtCognome.getText().trim();
+        String classe  = txtClasse.getText().trim();
 
-            file.close();
-
-        } catch (FileNotFoundException ex) {
-            System.out.println("File non trovato");
-        } catch (IOException e) {
-            System.out.println("Problema in lettura-scrittura file");
+        // Validazione campi
+        if (nome.isEmpty() || cognome.isEmpty() || classe.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Compila tutti i campi (Nome, Cognome, Classe).",
+                "Attenzione", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
         }
-        */
+        if (cmbGiteDisponibili.getSelectedIndex() == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Seleziona una gita.",
+                "Attenzione", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // ID gita = indice selezionato nel combobox (corrisponde al record nel file)
+        int idGita = cmbGiteDisponibili.getSelectedIndex();
+
+        // Crea lo studente con id temporaneo -1 (verrà assegnato dal file)
+        Studente s = new Studente(nome, cognome, classe, -1);
+
+        // Salva lo studente nel file e recupera l'ID assegnato
+        int idStudente = gestStudenti.aggiungiStudente(s);
+
+        if (idStudente == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Errore nel salvataggio dello studente.",
+                "Errore", javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Salva l'iscrizione (idStudente, idGita) nel file iscrizioni
+        gestGite.aggiungiIscrizione(idStudente, idGita);
+
+        // Feedback all'utente
+        jTextArea1.append("✓ " + nome + " " + cognome
+                + " (ID " + idStudente + ") iscritto a: "
+                + cmbGiteDisponibili.getSelectedItem()
+                + " (ID " + idGita + ")\n");
+
+        // Pulizia campi
+        txtNome.setText("");
+        txtCognome.setText("");
+        txtClasse.setText("");
     }//GEN-LAST:event_btnIscriviActionPerformed
 
     /**
